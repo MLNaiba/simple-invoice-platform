@@ -11,6 +11,8 @@ import io.github.MLNaiba.simpleinvoice.service.impl.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -19,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -121,16 +124,18 @@ public class CustomerServiceTests {
         verify(customerMapper, never()).toResponse(any());
     }
 
-    @Test
-    public void getAllCustomers_givenMultipleCustomers_shouldReturnCustomerList() {
+    @ParameterizedTest
+    @ValueSource(ints = {3, 0})
+    public void getAllCustomers_givenMultipleCustomers_shouldReturnCustomerList(
+            int customerCount
+    ) {
 
         // ARRANGE
 
-        List<Customer> customers = List.of(
-                customer(0),
-                customer(1),
-                customer(2)
-        );
+        List<Customer> customers =
+                IntStream.range(0, customerCount)
+                        .mapToObj(this::customer)
+                        .toList();
 
         when(customerRepository.findAll()).thenReturn(customers);
 
@@ -142,9 +147,9 @@ public class CustomerServiceTests {
 
         verify(customerRepository).findAll();
 
-        assertThat(responses).hasSize(customers.size());
+        assertThat(responses).hasSize(customerCount);
 
-        for (int i = 0; i < responses.size(); ++i) {
+        for (int i = 0; i < customerCount; ++i) {
             assertThat(responses.get(i))
                     .usingRecursiveComparison()
                     .isEqualTo(customers.get(i));
