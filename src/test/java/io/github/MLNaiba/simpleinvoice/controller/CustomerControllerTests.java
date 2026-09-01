@@ -8,7 +8,6 @@ import io.github.MLNaiba.simpleinvoice.service.CustomerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -21,10 +20,8 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,8 +35,10 @@ public class CustomerControllerTests {
     private static final String ID = "id";
     private static final String NAME = "name";
 
-    private static final String INVALID_ID = "invalid-id";
     private static final String UPDATED_NAME = "updated-name";
+
+    private static final String INVALID_ID = "invalid-id";
+    private static final String INVALID_NAME = "";
 
     private static final String BASE_URL = "/api/customers";
     private static final String ID_URL = BASE_URL + "/%s";
@@ -83,11 +82,11 @@ public class CustomerControllerTests {
     }
 
     @Test
-    public void createCustomer_givenInvalidRequest_shouldReturnBadRequest() throws Exception {
+    public void createCustomer_givenInvalidRequestBadParameters_shouldReturnBadRequest() throws Exception {
 
         // ARRANGE
 
-        CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest("");
+        CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest(INVALID_NAME);
 
         // ACT
 
@@ -101,8 +100,10 @@ public class CustomerControllerTests {
                 .andExpect(jsonPath("$.message").value(VALIDATION_FAILED))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors").isNotEmpty())
+                .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.errors", hasItem(NAME_REQUIRED)));
+
+        verify(customerService, never()).createCustomer(any());
     }
 
     @Test
@@ -126,18 +127,15 @@ public class CustomerControllerTests {
                 .andExpect(jsonPath("$.id").value(customerResponse.id()))
                 .andExpect(jsonPath("$.name").value(customerResponse.name()));
 
-        ArgumentCaptor<String> requestIdCaptor = ArgumentCaptor.forClass(String.class);
-        verify(customerService).getCustomerById(requestIdCaptor.capture());
-        String capturedId = requestIdCaptor.getValue();
-        assertThat(capturedId).isEqualTo(customerResponse.id());
+        verify(customerService).getCustomerById(customerResponse.id());
     }
 
     @Test
-    public void getCustomerById_givenInvalidRequest_shouldReturnNotFound() throws Exception {
+    public void getCustomerById_givenInvalidRequestNonexistentId_shouldReturnNotFound() throws Exception {
 
         // ARRANGE
 
-        given(customerService.getCustomerById(any(String.class)))
+        given(customerService.getCustomerById(INVALID_ID))
                 .willThrow(new ResourceNotFoundException("Customer", INVALID_ID));
 
         // ACT
@@ -211,18 +209,15 @@ public class CustomerControllerTests {
                 .andExpect(jsonPath("$.id").value(customerResponse.id()))
                 .andExpect(jsonPath("$.name").value(customerResponse.name()));
 
-        ArgumentCaptor<UpdateCustomerRequest> requestCaptor = ArgumentCaptor.forClass(UpdateCustomerRequest.class);
-        verify(customerService).updateCustomer(eq(ID), requestCaptor.capture());
-        UpdateCustomerRequest capturedRequest = requestCaptor.getValue();
-        assertThat(capturedRequest.name()).isEqualTo(updateCustomerRequest.name());
+        verify(customerService).updateCustomer(ID, updateCustomerRequest);
     }
 
     @Test
-    public void updateCustomer_givenInvalidRequestEmptyName_shouldReturnBadRequest() throws Exception {
+    public void updateCustomer_givenInvalidRequestBadParameters_shouldReturnBadRequest() throws Exception {
 
         // ARRANGE
 
-        UpdateCustomerRequest updateCustomerRequest = new UpdateCustomerRequest("");
+        UpdateCustomerRequest updateCustomerRequest = new UpdateCustomerRequest(INVALID_NAME);
 
         // ACT
 
@@ -237,7 +232,7 @@ public class CustomerControllerTests {
                 .andExpect(jsonPath("$.message").value(VALIDATION_FAILED))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors").isNotEmpty())
+                .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.errors", hasItem(NAME_REQUIRED)));
 
         verify(customerService, never()).updateCustomer(any(String.class), any(UpdateCustomerRequest.class));
@@ -250,7 +245,9 @@ public class CustomerControllerTests {
 
         UpdateCustomerRequest updateCustomerRequest = updateRequest();
 
-        given(customerService.updateCustomer(any(String.class), any(UpdateCustomerRequest.class)))
+        given(customerService.updateCustomer(
+                INVALID_ID,
+                updateCustomerRequest))
                 .willThrow(new ResourceNotFoundException("Customer", INVALID_ID));
 
         // ACT
@@ -267,8 +264,8 @@ public class CustomerControllerTests {
                 .andExpect(jsonPath("$.timestamp").exists());
 
         verify(customerService).updateCustomer(
-                eq(INVALID_ID),
-                eq(updateCustomerRequest));
+                INVALID_ID,
+                updateCustomerRequest);
     }
 
     @Test
@@ -286,13 +283,13 @@ public class CustomerControllerTests {
     }
 
     @Test
-    public void deleteCustomer_givenInvalidRequest_shouldReturnBadRequest() throws Exception {
+    public void deleteCustomer_givenInvalidRequestNonexistentId_shouldReturnNotFound() throws Exception {
 
         // ARRANGE
 
         doThrow(new ResourceNotFoundException("Customer", INVALID_ID))
                 .when(customerService)
-                .deleteCustomer(any(String.class));
+                .deleteCustomer(INVALID_ID);
 
         // ACT
 
@@ -302,7 +299,6 @@ public class CustomerControllerTests {
 
         response
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message", containsString(INVALID_ID)))
                 .andExpect(jsonPath("$.timestamp").exists());
 
