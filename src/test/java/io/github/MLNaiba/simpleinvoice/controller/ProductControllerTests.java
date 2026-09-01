@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -94,7 +93,7 @@ public class ProductControllerTests {
 
     @ParameterizedTest
     @MethodSource("invalidProductData")
-    public void createProduct_givenInvalidRequest_shouldReturnBadRequest(
+    public void createProduct_givenInvalidRequestBadParameters_shouldReturnBadRequest(
             String name,
             BigDecimal price,
             List<String> expectedErrors
@@ -154,7 +153,7 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void getProductById_givenInvalidRequest_shouldReturnNotFound() throws Exception {
+    public void getProductById_givenInvalidRequestNonexistentId_shouldReturnNotFound() throws Exception {
 
         // ARRANGE
 
@@ -239,7 +238,7 @@ public class ProductControllerTests {
 
     @ParameterizedTest
     @MethodSource("invalidProductData")
-    public void updateProduct_givenInvalidRequest_shouldReturnBadRequest(
+    public void updateProduct_givenInvalidRequestBadParameters_shouldReturnBadRequest(
             String name,
             BigDecimal price,
             List<String> expectedErrors
@@ -281,7 +280,9 @@ public class ProductControllerTests {
 
         UpdateProductRequest updateProductRequest = updateRequest();
 
-        given(productService.updateProduct(any(String.class), any(UpdateProductRequest.class)))
+        given(productService.updateProduct(
+                INVALID_ID,
+                updateProductRequest))
                 .willThrow(new ResourceNotFoundException("Product", INVALID_ID));
 
         // ACT
@@ -298,8 +299,8 @@ public class ProductControllerTests {
                 .andExpect(jsonPath("$.timestamp").exists());
 
         verify(productService).updateProduct(
-                eq(INVALID_ID),
-                eq(updateProductRequest));
+                INVALID_ID,
+                updateProductRequest);
     }
 
     @Test
@@ -317,7 +318,7 @@ public class ProductControllerTests {
     }
 
     @Test
-    public void deleteProduct_givenInvalidRequest_shouldReturnNotFound() throws Exception {
+    public void deleteProduct_givenInvalidRequestNonexistentId_shouldReturnNotFound() throws Exception {
 
         // ARRANGE
 
