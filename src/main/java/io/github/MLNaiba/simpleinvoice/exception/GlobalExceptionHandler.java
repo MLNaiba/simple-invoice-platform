@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+    @ExceptionHandler(InvalidInvoiceStateTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidInvoiceStateTransitionException(
+            InvalidInvoiceStateTransitionException exception) {
+        return buildErrorResponse(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
     // ---
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message) {
