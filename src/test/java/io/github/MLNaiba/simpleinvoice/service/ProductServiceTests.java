@@ -205,7 +205,6 @@ public class ProductServiceTests {
         Product capturedProduct = productCaptor.getValue();
         assertThat(capturedProduct)
                 .usingRecursiveComparison()
-                .ignoringFields("id")
                 .isEqualTo(updatedProduct);
 
         assertThat(response)

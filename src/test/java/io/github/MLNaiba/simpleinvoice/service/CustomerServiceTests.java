@@ -192,7 +192,6 @@ public class CustomerServiceTests {
         Customer capturedCustomer = customerCaptor.getValue();
         assertThat(capturedCustomer)
                 .usingRecursiveComparison()
-                .ignoringFields("id")
                 .isEqualTo(updatedCustomer);
 
         assertThat(response)
