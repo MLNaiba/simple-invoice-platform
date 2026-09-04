@@ -2,7 +2,7 @@ package io.github.MLNaiba.simpleinvoice.exception;
 
 public class ResourceAlreadyExistsException extends RuntimeException {
   public ResourceAlreadyExistsException(String resourceType, Object id) {
-    this(resourceType, "id", id);
+    this(resourceType, "username", id);
   }
 
   public ResourceAlreadyExistsException(
