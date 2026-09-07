@@ -3,6 +3,7 @@ package io.github.MLNaiba.simpleinvoice.controller;
 import io.github.MLNaiba.simpleinvoice.dto.AuthenticationRequest;
 import io.github.MLNaiba.simpleinvoice.dto.AuthenticationResponse;
 import io.github.MLNaiba.simpleinvoice.service.AuthenticationService;
+import io.github.MLNaiba.simpleinvoice.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,6 +13,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -56,6 +58,13 @@ public class AuthenticationControllerTests {
 
     @MockitoBean
     private AuthenticationService authenticationService;
+
+    // Security filter dependencies required by @WebMvcTest
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Test
     public void authenticate_givenValidRequest_shouldReturnToken() throws Exception {

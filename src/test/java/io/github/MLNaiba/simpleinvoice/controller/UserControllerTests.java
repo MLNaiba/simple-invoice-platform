@@ -4,6 +4,7 @@ import io.github.MLNaiba.simpleinvoice.dto.CreateUserRequest;
 import io.github.MLNaiba.simpleinvoice.dto.UserResponse;
 import io.github.MLNaiba.simpleinvoice.exception.ResourceAlreadyExistsException;
 import io.github.MLNaiba.simpleinvoice.exception.ResourceNotFoundException;
+import io.github.MLNaiba.simpleinvoice.service.JwtService;
 import io.github.MLNaiba.simpleinvoice.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -63,6 +65,13 @@ public class UserControllerTests {
 
     @MockitoBean
     private UserService userService;
+
+    // Security filter dependencies required by @WebMvcTest
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Test
     public void createUser_givenValidRequest_shouldReturnCreatedUser() throws Exception {

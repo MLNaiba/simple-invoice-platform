@@ -4,6 +4,7 @@ import io.github.MLNaiba.simpleinvoice.domain.InvoiceStatus;
 import io.github.MLNaiba.simpleinvoice.dto.*;
 import io.github.MLNaiba.simpleinvoice.exception.ResourceNotFoundException;
 import io.github.MLNaiba.simpleinvoice.service.InvoiceService;
+import io.github.MLNaiba.simpleinvoice.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -71,6 +73,13 @@ public class InvoiceControllerTests {
 
     @MockitoBean
     private InvoiceService invoiceService;
+
+    // Security filter dependencies required by @WebMvcTest
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3})
