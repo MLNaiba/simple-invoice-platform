@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.MLNaiba</groupId>
 	<artifactId>simple-invoice-platform</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 	<name>Simple Invoice Platform</name>
 	<description>REST API for managing customers, products and invoices</description>
 	<properties>
