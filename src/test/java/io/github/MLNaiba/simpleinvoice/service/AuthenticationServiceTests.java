@@ -27,7 +27,7 @@ public class AuthenticationServiceTests {
 
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
-    private static final String ENCODED_PASSWORD = "password-encoded";
+    private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String USER_ROLE = "USER";
     private static final String TOKEN = "token";
 
