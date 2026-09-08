@@ -2,6 +2,7 @@ package io.github.MLNaiba.simpleinvoice.service.impl;
 
 import io.github.MLNaiba.simpleinvoice.domain.User;
 import io.github.MLNaiba.simpleinvoice.repository.UserRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +18,9 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public @NonNull UserDetails loadUserByUsername(
+            @NonNull String username
+    ) throws UsernameNotFoundException {
         log.info(
                 "Loading user [{}]",
                 username
